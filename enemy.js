@@ -1,20 +1,30 @@
 // 敵：作る・入れる・動かす・描く（足すものの形）
 
 // ① 作る：敵を1体作って返す関数（呼ぶたびに、新しい敵が1体できる）
-function createEnemy(x, vx) {
-  return { x: x, y: floor.y - 32, w: 32, h: 32, vx: vx, alive: true };
+const none = "none";
+const LoopJamp = "LoopJamp";
+function createEnemy(x, vx,type) {
+  return { x: x, y: floor.y - 32, w: 32, h: 32, vx: vx,vy:0, alive: true,type:type };
 }
 
 // ② 入れる：敵をまとめて入れる配列（７-６で入れ直すので let）
+
 let enemies = [];
-enemies.push(createEnemy(200, 80));
-enemies.push(createEnemy(380, -120));
-enemies.push(createEnemy(540, 60));
+enemies.push(createEnemy(200, 80,LoopJamp));
+enemies.push(createEnemy(380, -120,none));
+enemies.push(createEnemy(540, 60,LoopJamp));
 
 // ③ 動かす：配列の敵を1体ずつ取り出して、同じ処理をする
 function updateEnemies(dt) {
   for (const enemy of enemies) {
     enemy.x = enemy.x + enemy.vx * dt;
+    if(enemy.type===LoopJamp){
+      enemy.vy=enemy.vy+GRAVITY*dt;
+      enemy.y=enemy.y+enemy.vy*dt;}
+      if (enemy.y + enemy.h >=canvas.height ) {
+    enemy.y = floor.y-enemy.h;
+    enemy.vy = -JUMP_SPEED;
+    }
     // 端を越えたら、位置を戻して、向きを反対に（５-４の跳ね返り）
     if (enemy.x < 0) {
       enemy.x = 0;
@@ -41,10 +51,16 @@ function collideWithEnemies(prevBottom) {
 
 // ④ 描く：配列の敵を1体ずつ取り出して描く
 function drawEnemies() {
-  ctx.fillStyle = "#ff6b6b";
+  
   for (const enemy of enemies) {
+    if(enemy.type===LoopJamp){
+  ctx.fillStyle = "#6b97ff";}
+  else{
+    ctx.fillStyle = "#f2ff00";
+  }
     ctx.fillRect(enemy.x, enemy.y, enemy.w, enemy.h);
   }
+  
    ctx.fillStyle = "#e8eeff";
   ctx.fillText("敵 = " + enemies.length, 10, 40);
 }
